@@ -1,0 +1,22 @@
+{
+    "name": "serpentine/serpentine",
+    "description": "Intellectual bot creation platform for PHP 7.4+",
+    "keywords": ["bot", "machine learning"],
+    "version": "0.1.0",
+    "homepage": "https://github.com/serpentine-ai/serpentine",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Nikita Podvirnyy",
+            "email": "suimin.tu.mu.ga.mi@gmail.com",
+            "homepage": "https://github.com/KRypt0nn",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "ext-mbstring": "*",
+        "wamania/php-stemmer": "^3.0",
+        "krypt0nn/cati-tree": "^0.2.3"
+    }
+}
