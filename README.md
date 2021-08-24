@@ -1,6 +1,6 @@
 <h1 align="center">🚀 Serpentine</h1>
 
-**Serpentine** is a platform to create an intellectual bot on in PHP 7.4
+**Serpentine** is a platform to create an intellectual bot on in PHP 8
 
 ## Installation
 
