@@ -9,6 +9,7 @@ use Serpentine\Events\{
 };
 
 use CATI\RandomForest;
+use Wamania\Snowball\StemmerFactory;
 
 /**
  * Serpentine core
@@ -122,7 +123,7 @@ class Serpentine
      */
     public static function getTokens (string $text, string $language = null): array
     {
-        $stemmer = Wamania\Snowball\StemmerFactory::create ($language ?: Config::get ('language'));
+        $stemmer = StemmerFactory::create ($language ?: Config::get ('language'));
 
         return array_values (array_filter (array_map (function (string $word) use ($stemmer)
         {

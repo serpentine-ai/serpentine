@@ -2,19 +2,26 @@
 
 namespace Serpentine;
 
+use Serpentine\Message\{
+    Text,
+    Author
+};
+
+use Serpentine\Message\Text\Raw;
+
 /**
  * Message
  */
 class Message
 {
-    public MessageText $text;
-    public ?int $author  = null;
+    public Text $text;
+    public ?Author $author = null;
 
     /**
-     * @param MessageText $text
-     * [@param int $author = null]
+     * @param Text $text
+     * [@param Author $author = null]
      */
-    public function __construct (MessageText $text, int $author = null)
+    public function __construct (Text $text, Author $author = null)
     {
         $this->text   = $text;
         $this->author = $author;
@@ -23,25 +30,20 @@ class Message
     /**
      * Quikly create new message
      * 
-     * @param MessageText|string $text
-     * I really wanted to use union data type here, but
-     * PHP 7.4 won and yeah, maybe when PHP 8 will become more popular
-     * 
-     * [@param int $author = null]
+     * @param Text|string $text
+     * [@param Author|int $author = null]
      * 
      * @return self
-     * 
-     * @throws \Exception when text is invalid
      */
-    public static function new (MessageText|string $text, int $author = null): self
+    public static function new (Text|string $text, Author|int $author = null): self
     {
         if (is_string ($text))
-            return new self (new Serpentine\Message\RawText ($text), $author);
+            $text = new Raw ($text);
 
-        elseif (is_object ($text) && $text instanceof MessageText)
-            return new self ($text, $author);
+        if (is_int ($author))
+            $author = new Author ($author);
 
-        else throw new \Exception ('Invalid text value');
+        return new self ($text, $author);
     }
 
     /**

@@ -1,13 +1,13 @@
 <?php
 
-namespace Serpentine\Message;
+namespace Serpentine\Message\Text;
 
-use Serpentine\MessageText;
+use Serpentine\Message\Text;
 
 /**
  * Raw message text
  */
-class RawText implements MessageText
+class Raw implements Text
 {
     protected string $text;
 

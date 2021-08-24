@@ -1,11 +1,11 @@
 <?php
 
-namespace Serpentine;
+namespace Serpentine\Message;
 
 /**
  * Message's text storage
  */
-interface MessageText
+interface Text
 {
     /**
      * Get message text
