@@ -18,5 +18,8 @@
         "ext-mbstring": "*",
         "wamania/php-stemmer": "^3.0",
         "krypt0nn/cati-tree": "^0.2.3"
+    },
+    "autoload": {
+        "files": ["serpentine.php"]
     }
 }
