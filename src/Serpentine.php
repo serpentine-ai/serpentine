@@ -35,11 +35,77 @@ class Serpentine
      */
     public function __construct (array $params = [])
     {
-        foreach ($params as $name => $param)
-            $this->$name = $param;
+        /**
+         * Array of allowed params
+         */
+        $allowedParams = [
+            'pipeline'          => 'addIO',
+            'actions'           => 'addAction',
+            'contextIdentifier' => 'addContextIdentifier',
+            'inputHandlers'     => 'addInputHandler',
+            'tickEvents'        => 'addTickEvent',
+            'intervalEvents'    => 'addIntervalEvent'
+        ];
 
-        if (file_exists (self::$model_path))
-            $this->forest = RandomForest::load (json_decode (file_get_contents (self::$model_path), true));
+        /**
+         * Parse allowed params and apply them
+         */
+        foreach ($allowedParams as $param => $method)
+            if (isset ($params[$param]) && is_array ($params[$param]))
+                foreach ($params[$param] as $item)
+                    $this->$method ($item);
+    }
+
+    /**
+     * Load CATI Tree model
+     * 
+     * [@param string $path = null] (by default uses model_path static variable)
+     * 
+     * @return self
+     */
+    public function loadModel (string $path = null): self
+    {
+        $this->forest = RandomForest::load (json_decode (file_get_contents ($path ?: self::$model_path), true));
+
+        return $this;
+    }
+
+    /**
+     * Save CATI Tree model
+     * 
+     * [@param string $path = null] (by default uses model_path static variable)
+     * 
+     * @return self
+     */
+    public function saveModel (string $path = null, bool $prettyPrint = false): self
+    {
+        file_put_contents ($path ?: self::$model_path, json_encode ($this->forest->export (), $prettyPrint ? JSON_PRETTY_PRINT : 0));
+
+        return $this;
+    }
+
+    /**
+     * Train CATI Tree model
+     * 
+     * [@param string $language = null] (by default uses config language value)
+     * 
+     * @return self
+     */
+    public function trainModel (string $language = null): self
+    {
+        $samples = $this->getSamples ();
+
+        foreach ($samples as $actionName => &$actionSamples)
+            $actionSamples = array_map (fn ($items) => self::getTokens ($items, $language), $actionSamples);
+
+        $this->forest = RandomForest::create (
+            $samples,
+            Config::get ('randomForest.minThreshold'),
+            Config::get ('randomForest.maxThreshold'),
+            Config::get ('randomForest.forestSize')
+        );
+
+        return $this;
     }
 
     public function addIO (IO $io): self
@@ -97,18 +163,14 @@ class Serpentine
     /**
      * Get all tokenized training samples
      * 
-     * [@param string $language = null] (by default uses config language value)
-     * 
      * @return array
      */
-    public function getSamples (string $language = null): array
+    public function getSamples (): array
     {
         $samples = [];
 
         foreach ($this->actions as $action)
-            $samples = array_merge ($samples, array_map (
-                fn ($sample) => self::getTokens ($sample, $language),
-                $action->getSamples ()));
+            $samples[$action->getName ()] = $action->getSamples ();
 
         return $samples;
     }
@@ -129,8 +191,8 @@ class Serpentine
         {
             $word = trim ($word, '!?.,()[]{}');
 
-            return strlen ($word) > 2 ?
-                $stemmer->stem ($word) : null;
+            return /*strlen ($word) > 2 ?*/
+                $stemmer->stem ($word) /*: null*/;
         }, preg_split ('/\s/', mb_strtolower ($text)))));
     }
 
@@ -213,7 +275,7 @@ class Serpentine
     {
         $probabilities = $this->forest->probability ($message->getTokens ());
 
-        if ($probabilities['null'] >= 0.5)
+        if ($probabilities['null'] > 0.5)
             return null;
 
         else
@@ -222,36 +284,5 @@ class Serpentine
 
             return $this->actions[array_keys ($probabilities['categories'])[0]] ?? null;
         }
-    }
-
-    /**
-     * Train CATI Tree model
-     * 
-     * @return self
-     */
-    public function trainModel (): self
-    {
-        $samples = $this->getSamples ();
-        $hash = md5 (join ($samples));
-
-        if (file_exists (self::$model_path))
-        {
-            if (json_decode (file_get_contents (self::$model_path))->hash == $hash)
-                return $this;
-        }
-
-        $this->forest = RandomForest::create (
-            $samples,
-            Config::get ('randomForest.minThreshold'),
-            Config::get ('randomForest.maxThreshold'),
-            Config::get ('randomForest.forestSize')
-        );
-
-        file_put_contents (self::$model_path, json_encode ([
-            'model' => $this->forest->export (),
-            'hash'  => $hash
-        ]));
-
-        return $this;
     }
 }

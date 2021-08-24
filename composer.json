@@ -1,8 +1,8 @@
 {
     "name": "serpentine/serpentine",
-    "description": "Intellectual bot creation platform for PHP 7.4+",
+    "description": "Intellectual bot creation platform for PHP 8",
     "keywords": ["bot", "machine learning"],
-    "version": "0.2.0",
+    "version": "0.3.0",
     "homepage": "https://github.com/serpentine-ai/serpentine",
     "license": "GPL-3.0-or-later",
     "authors": [
